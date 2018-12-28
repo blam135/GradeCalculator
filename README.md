@@ -5,13 +5,13 @@ A Java Program that calculates what marks you need in the exam to get a certain 
 
 **Why did you make it?**
 
-Well I got bored during the holidays and also I always calculated how many marks I needed to get a certain grade and also always been
+Well I got bored during the holidays and also I always calculated how many marks I needed to get a certain grade every time during exam periods and also always been
 interested in learning how to make GUI Applications, so why not make this the first one? 
 
 ## Guidelines on how to use it
 Simply download the file "GradeCalculator.jar" and you will see a program that looks like this:
 
-![image](Capture.png)
+![image](https://github.com/blam135/GradeCalculator/blob/master/Capture.PNG)
 
 All fields except "UOS" must be filled, in order for the program to work
 
