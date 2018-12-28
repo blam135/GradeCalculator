@@ -11,7 +11,7 @@ interested in learning how to make GUI Applications, so why not make this the fi
 ## Guidelines on how to use it
 Simply download the file "GradeCalculator.jar" and you will see a program that looks like this:
 
-![demo](Capture.png)
+<img src = "./Photo/Capture.png">
 
 All fields except "UOS" must be filled, in order for the program to work
 
@@ -31,3 +31,5 @@ All fields except "UOS" must be filled, in order for the program to work
 ### Text: 
 #### Accumulated Percentage - How many marks in % have you received so far 
 #### Max Percentage Accumulated - How many marks in % max you could've received
+
+© Brendon Lam 2018
