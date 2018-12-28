@@ -11,7 +11,7 @@ interested in learning how to make GUI Applications, so why not make this the fi
 ## Guidelines on how to use it
 Simply download the file "GradeCalculator.jar" and you will see a program that looks like this:
 
-<img src = "./Photo/Capture.png">
+<img src = "Capture.png">
 
 All fields except "UOS" must be filled, in order for the program to work
 
