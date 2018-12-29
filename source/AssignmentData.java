@@ -1,5 +1,3 @@
-package source;
-
 public class AssignmentData {
     private String assessmentTitle;
     private double markReceived;

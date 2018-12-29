@@ -1,5 +1,3 @@
-package source;
-
 /*
 1. Initialize the object
 2. Set the bounds
