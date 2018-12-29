@@ -1,27 +1,29 @@
+package source;
+
 public class AssignmentData {
     private String assessmentTitle;
-    private int markReceived;
+    private double markReceived;
     private int maxMark;
     private double percentReceived;
-    private int weighting;
+    private double weighting;
 
-    public AssignmentData(String assessmentTitle, int markReceived, int maxMark, int weighting) {
+    public AssignmentData(String assessmentTitle, double markReceived, int maxMark, double weighting) {
         this.assessmentTitle = assessmentTitle;
         this.markReceived = markReceived;
         this.maxMark = maxMark;
         this.weighting = weighting;
-        percentReceived = ((double) markReceived / (double) maxMark) * (double) weighting;
+        percentReceived = ((double) markReceived / (double) maxMark) * (double) weighting; // Fix this later
     }
 
     public String getAssessmentTitle() {
         return assessmentTitle;
     }
 
-    public int getMarkReceived() {
+    public double getMarkReceived() {
         return markReceived;
     }
 
-    public int getMaxMark() {
+    public double getMaxMark() {
         return maxMark;
     }
 
@@ -29,7 +31,7 @@ public class AssignmentData {
         return percentReceived;
     }
 
-    public int getWeighting() {
+    public double getWeighting() {
         return weighting;
     }
 }
