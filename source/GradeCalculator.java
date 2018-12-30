@@ -3,6 +3,7 @@
 2. Set the bounds
 3. Add to panel
 */
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -37,6 +38,9 @@ public class GradeCalculator extends JFrame {
     JButton addToListButton;
     JButton removeButton;
     JButton updateButton;
+    JComboBox<String> dropdown;
+    JLabel gradingSystemLabel;
+    String[] dropdownWords;
     
     // Constructor
     public GradeCalculator() {
@@ -110,7 +114,7 @@ public class GradeCalculator extends JFrame {
         });
 
         // Accumulated and Max Percentage Accumulated Labels
-        int totalXPosition = inputPositionX - 300;
+        int totalXPosition = inputPositionX - 360;
         int totalHeight = 15;
         accumulatedPercentage = new JLabel("Accumulated Percentage: 0.00%");
         accumulatedPercentage.setBounds(totalXPosition, 15, 200, totalHeight);
@@ -118,6 +122,8 @@ public class GradeCalculator extends JFrame {
         // -----
         maxAccumulatedPercentage = new JLabel("Max Accumulated Percentage: 0.00%");
         maxAccumulatedPercentage.setBounds(totalXPosition, 45, 500, totalHeight);
+        accumulatedPercentage.setForeground(Color.RED);
+        maxAccumulatedPercentage.setForeground(Color.RED);
         panel.add(maxAccumulatedPercentage);
 
         // Calculate Button
@@ -231,6 +237,15 @@ public class GradeCalculator extends JFrame {
         });
         panel.add(updateButton);
 
+        // NZ-GPA OR AUS-WAM Dropdown
+        dropdownWords = new String[] {"NZ-GPA", "AUS-WAM"};
+        dropdown = new JComboBox<String>(dropdownWords);
+        dropdown.setBounds(totalXPosition + 250, 35, 200, totalHeight + 5);
+        gradingSystemLabel = new JLabel("Grading System:");
+        gradingSystemLabel.setBounds(totalXPosition + 250, 10, 200, totalHeight + 5);
+        panel.add(dropdown);
+        panel.add(gradingSystemLabel);
+
         setContentPane(panel);
     }
 
@@ -271,6 +286,9 @@ public class GradeCalculator extends JFrame {
 
     // Function for the calculate button 
     public void calculate() {
+        
+        String grade_system = (String) dropdown.getSelectedItem();
+
         if (intCompTextField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Please cap your marks", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -282,76 +300,114 @@ public class GradeCalculator extends JFrame {
             return;
         }
 
-        double[] listOfMark = calculateGrades();
-        String outputText = uosTextField.getText() + " EXAM: \n";
+        double[] listOfMark = calculateGrades(grade_system);
+        String outputText;
 
-        if (listOfMark[0] <= 0) {
-            outputText += "PASS: You have already passed the course \n";
-        } else if (listOfMark[0] > 100) {
-            outputText += "Sorry you have failed the course \n";
+        if (uosTextField.getText().isEmpty()) {
+            outputText= "EXAM: \n";
         } else {
-            outputText += "PASS : " + String.format("%.2f", listOfMark[0]) + "% \n";
+            outputText = uosTextField.getText() + " EXAM: \n";
         }
 
-        if (listOfMark[1] <= 0) {
-            outputText += "CREDIT: You have already gained a credit\n";
-        } else if (listOfMark[1] > 100) {
-            outputText += "CREDIT: Sorry, you cannot get a credit or higher\n";
-        } else {
-            outputText += "CREDIT : " + String.format("%.2f", listOfMark[1]) + "% \n";
-        }
+        if (grade_system.equals(dropdownWords[1])) {
+            String[] grade_words = new String[] {"PASS", "CREDIT", "DISTINCTION", "HIGH DISTINCTION"};
 
-        if (listOfMark[2] <= 0) {
-            outputText += "DISTINCTION: You have already gained a Distinction\n";
-        } else if (listOfMark[2] > 100) {
-            outputText += "DISTINCTION: Sorry, you cannot get a Distinction or higher\n";
+            for (int i = 0; i < grade_words.length; i++) {
+                if (listOfMark[i] <= 0) {
+                    outputText += grade_words[i] + ": You have already gained this grade \n";
+                } else if (listOfMark[i] > 100) {
+                    outputText += grade_words[i] + ": Sorry you cannot achieve this grade\n";
+                } else {
+                    outputText += grade_words[i] + ": " + String.format("%.2f", listOfMark[i]) + "% \n";
+                }
+            }
         } else {
-            outputText += "DISTINCTION : " + String.format("%.2f", listOfMark[2]) + "% \n";
+            String[] grade_words = new String[] {"A+","A","A-","B+","B","B-","C+","C","C-","D+","D", "D-"};
+            for (int i = 0; i < grade_words.length; i++) {
+                if (listOfMark[i] <= 0) {
+                    outputText += grade_words[i] + ": You have already gained this grade \n";
+                } else if (listOfMark[i] > 100) {
+                    outputText += grade_words[i] + ": Sorry you cannot achieve this grade\n";
+                } else {
+                    outputText += grade_words[i] + ": " + String.format("%.2f", listOfMark[i]) + "% \n";
+                }
+            }
         }
-
-        if (listOfMark[3] <= 0) {
-            outputText += "HIGH DISTINCTION: You have already gained a High Distinction\n";
-        } else if (listOfMark[3] > 100) {
-            outputText += "HIGH DISTINCTION: Sorry, you cannot get a High Distinction\n";
-        } else {
-            outputText += "HIGH DISTINCTION : " + String.format("%.2f", listOfMark[3]) + "% \n";
-        }
-
         Object[] options = {"Close", "Export to CSV"};
-
         int option = JOptionPane.showOptionDialog(null, outputText, "Percentage in Exam", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
         if (option == 1) {
             exportToCSV();
             return;
         }
-        
     }
 
     // Calculates % needed in exam to get a certain grade 
-    public double[] calculateGrades() {
-        /*
-        This will return an array of corresponding grades where:
-        index 0: Pass
-        index 1: Credit
-        index 2: Distinction 
-        index 3: High Distinction 
-        (in terms of what % you need to get in the exam) 
-        - Assumes intCompTextField has been filled in already 
-        - Can return values that are abnormal i.e. outside the range 0 - 100
-        */
-        double examWorth = 100.0 - Double.valueOf(intCompTextField.getText());
+    public double[] calculateGrades(String grade_system) {
+        if (grade_system == dropdownWords[1]) {
+            /*
+            This will return an array of corresponding grades where:
+            index 0: Pass
+            index 1: Credit
+            index 2: Distinction 
+            index 3: High Distinction 
+            (in terms of what % you need to get in the exam) 
+            - Assumes intCompTextField has been filled in already 
+            - Can return values that are abnormal i.e. outside the range 0 - 100
+            */
+            double examWorth = 100.0 - Double.valueOf(intCompTextField.getText());
 
-        double[] returnList = new double[4];
-        double totalMark = 0;
-        for (AssignmentData ad : data) {
-            totalMark += ad.getPercentReceived();
+            double[] returnList = new double[4];
+            double totalMark = 0;
+            for (AssignmentData ad : data) {
+                totalMark += ad.getPercentReceived();
+            }
+
+            returnList[0] = ((50.0 - totalMark) / examWorth) * 100;
+            returnList[1] = ((65.0 - totalMark) / examWorth) * 100;
+            returnList[2] = ((75.0 - totalMark) / examWorth) * 100;
+            returnList[3] = ((85.0 - totalMark) / examWorth) * 100;
+            return returnList;
+        } else {
+            /*
+            This will return an array of corresponding grades where:
+            index 0: A+
+            index 1: A
+            index 2: A-
+            index 3: B+
+            index 4: B
+            index 5: B-
+            index 6: C+
+            index 7: C
+            index 8: C-
+            index 9: D+
+            index 10: D
+            index 11: D-
+            (in terms of what % you need to get in the exam) 
+            - Assumes intCompTextField has been filled in already 
+            - Can return values that are abnormal i.e. outside the range 0 - 100
+            */
+            double examWorth = 100.0 - Double.valueOf(intCompTextField.getText());
+
+            double[] returnList = new double[12];
+            double totalMark = 0;
+            for (AssignmentData ad : data) {
+                totalMark += ad.getPercentReceived();
+            }
+
+            returnList[0] = ((90.0 - totalMark) / examWorth) * 100;
+            returnList[1] = ((85.0 - totalMark) / examWorth) * 100;
+            returnList[2] = ((80.0 - totalMark) / examWorth) * 100;
+            returnList[3] = ((75.0 - totalMark) / examWorth) * 100;
+            returnList[4] = ((70.0 - totalMark) / examWorth) * 100;
+            returnList[5] = ((65.0 - totalMark) / examWorth) * 100;
+            returnList[6] = ((60.0 - totalMark) / examWorth) * 100;
+            returnList[7] = ((55.0 - totalMark) / examWorth) * 100;
+            returnList[8] = ((50.0 - totalMark) / examWorth) * 100;
+            returnList[9] = ((45.0 - totalMark) / examWorth) * 100;
+            returnList[10] = ((40.0 - totalMark) / examWorth) * 100;
+            returnList[11] = ((40.0 - totalMark) / examWorth) * 100;
+            return returnList;
         }
-
-        returnList[0] = ((50.0 - totalMark) / examWorth) * 100;
-        returnList[1] = ((65.0 - totalMark) / examWorth) * 100;
-        returnList[2] = ((75.0 - totalMark) / examWorth) * 100;
-        returnList[3] = ((85.0 - totalMark) / examWorth) * 100;
-        return returnList;
     }
 
     // Function for the Add Button (-1) and Update Button (corresponding index) 
@@ -476,12 +532,19 @@ public class GradeCalculator extends JFrame {
             }
             content += "\n";
         }
-
-        content += "PERCENTAGE IN EXAM:\nPASS,CREDIT,DISTINCTION,HIGH DISTINCTION\n";
-        double[] examMarks = calculateGrades();
+        
+        String grade_system = (String) dropdown.getSelectedItem();
+        double[] examMarks;
+        if (grade_system.equals(dropdownWords[1])) {
+            content += "PERCENTAGE IN EXAM:\nPASS,CREDIT,DISTINCTION,HIGH DISTINCTION\n";
+        } else {
+            content += "PERCENTAGE IN EXAM:\nA+,A,A-,B+,B,B-,C+,C,C-,D+,D,D-\n";
+        }
+        examMarks = calculateGrades(grade_system);
         for (int i = 0; i < examMarks.length; i++) {
             content += examMarks[i] + ",";
         }
+
         content += "\n\nINTERNAL ASSESSMENT WORTH:\n";
         content += intCompTextField.getText() + "\n";
 
