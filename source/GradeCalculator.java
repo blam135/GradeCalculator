@@ -3,10 +3,11 @@
 2. Set the bounds
 3. Add to panel
 */
-
+import java.awt.Font;
 import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
 
@@ -34,6 +35,8 @@ public class GradeCalculator extends JFrame {
     JLabel percentWorthLabel;
     JTextField percentWorthInput;
     JButton addToListButton;
+    JButton removeButton;
+    JButton updateButton;
     
     // Constructor
     public GradeCalculator() {
@@ -69,8 +72,16 @@ public class GradeCalculator extends JFrame {
         intCompLabel.setBounds(tableXPosition, 50, 125, 15);
         panel.add(intCompLabel);
         intCompTextField = new JTextField();
-        intCompTextField.setBounds(tableXPosition + 130, 50, 20, 20);
+        intCompTextField.setBounds(tableXPosition + 130, 50, 40, 20);
         panel.add(intCompTextField);
+        intCompTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (!isCorrectNumberFormat(e.getKeyChar(), intCompTextField.getText())) {
+                    e.consume();
+                }
+            }
+        });
 
         // Table of Assessment Display
         tableOfAssessment = new JTable() {
@@ -82,19 +93,30 @@ public class GradeCalculator extends JFrame {
         scrollPaneAssessment = new JScrollPane(tableOfAssessment);
         scrollPaneAssessment.setBounds(scrollPaneX, scrollPaneY, scrollPaneWidth, scrollPaneHeight);
         panel.add(scrollPaneAssessment);
-        Object[] colNames = {"Assessment Title", "Mark Received", "Max Mark", "% Received", "Weighting"};        
-        modelAssessment = new DefaultTableModel();
+        Object[] colNames = {"Assessment Title", "Mark Received", "Max Mark", "% Received", "% Weighting"};        
+        modelAssessment = (DefaultTableModel)tableOfAssessment.getModel();
         modelAssessment.setColumnIdentifiers(colNames);
-        tableOfAssessment.setModel(modelAssessment);
-        
+        tableOfAssessment.setRowHeight(30);
+        tableOfAssessment.setFont(new Font("", 1, 15));
+        tableOfAssessment.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int i = tableOfAssessment.getSelectedRow();
+                assTitleInputText.setText(modelAssessment.getValueAt(i, 0).toString());
+                assInputText.setText(modelAssessment.getValueAt(i, 1).toString());
+                maxMarkInput.setText(modelAssessment.getValueAt(i, 2).toString());
+                percentWorthInput.setText(modelAssessment.getValueAt(i, 4).toString());
+            }
+        });
+
         // Accumulated and Max Percentage Accumulated Labels
         int totalXPosition = inputPositionX - 300;
         int totalHeight = 15;
-        accumulatedPercentage = new JLabel("Accumulated Percentage: 0%");
+        accumulatedPercentage = new JLabel("Accumulated Percentage: 0.00%");
         accumulatedPercentage.setBounds(totalXPosition, 15, 200, totalHeight);
         panel.add(accumulatedPercentage);
         // -----
-        maxAccumulatedPercentage = new JLabel("Max Percentage Accumulated: 0%");
+        maxAccumulatedPercentage = new JLabel("Max Accumulated Percentage: 0.00%");
         maxAccumulatedPercentage.setBounds(totalXPosition, 45, 500, totalHeight);
         panel.add(maxAccumulatedPercentage);
 
@@ -105,7 +127,6 @@ public class GradeCalculator extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 calculate();
-                exportToCSV();
             }
         });
         panel.add(calculateButton);
@@ -134,6 +155,14 @@ public class GradeCalculator extends JFrame {
         markReceivedLabel.setBounds(inputPositionX, 150, inputLabels, 10);        
         assInputText = new JTextField();
         assInputText.setBounds(inputPositionX, 170, 120, 20);
+        assInputText.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (!isCorrectNumberFormat(e.getKeyChar(), assInputText.getText())) {
+                    e.consume();
+                }
+            }
+        });
         panel.add(markReceivedLabel);
         panel.add(assInputText);
 
@@ -142,96 +171,160 @@ public class GradeCalculator extends JFrame {
         maxMarkLabel.setBounds(inputPositionX, 200, inputLabels, 10);        
         maxMarkInput = new JTextField();
         maxMarkInput.setBounds(inputPositionX, 220, 120, 20);
+        maxMarkInput.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (!isCorrectNumberFormat(e.getKeyChar(), maxMarkInput.getText())) {
+                    e.consume();
+                }
+            }
+        });
         panel.add(maxMarkLabel);
         panel.add(maxMarkInput);
 
         // Weighting Input 
-        percentWorthLabel = new JLabel("Weighting:");
+        percentWorthLabel = new JLabel("% Weighting:");
         percentWorthLabel.setBounds(inputPositionX, 250, inputLabels, 15);        
         percentWorthInput = new JTextField();
         percentWorthInput.setBounds(inputPositionX, 270, 120, 20);
+        percentWorthInput.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (!isCorrectNumberFormat(e.getKeyChar(), percentWorthInput.getText())) {
+                    e.consume();
+                }
+            }
+        });
         panel.add(percentWorthLabel);
         panel.add(percentWorthInput);
 
         // Add Button 
         addToListButton = new JButton("ADD");
-        addToListButton.setBounds(inputPositionX + 30, 310, 60, 20);
+        addToListButton.setBounds(inputPositionX + 30, 300, 60, 20);
         addToListButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addToList();
+                addToList(-1);
             }
         });
         panel.add(addToListButton);
 
+        // Remove Button 
+        removeButton = new JButton("REMOVE");
+        removeButton.setBounds(inputPositionX + 15, 330, 90, 20);
+        removeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                remove();
+            }
+        });
+        panel.add(removeButton);
+        
+        // Update Button 
+        updateButton = new JButton("UPDATE");
+        updateButton.setBounds(inputPositionX + 15, 360, 88, 20);
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addToList(tableOfAssessment.getSelectedRow());
+            }
+        });
+        panel.add(updateButton);
+
         setContentPane(panel);
     }
 
-    // Resets inputted data
+    // For the textfield inputs, checks if the numbers typed are actually double numbers:
+    public boolean isCorrectNumberFormat(char charToAppend, String origin) {
+        if (origin.length() == 3 && origin.indexOf('.') == -1) {
+            return false;
+        }
+
+        if (charToAppend == '.' && origin.length() == 0) {
+            return false;
+        } else if (origin.indexOf(charToAppend) != -1 && charToAppend == '.') {
+            return false;
+        } else if (origin.length() > 4) {
+            return false;
+        }
+
+        try {   
+            if (charToAppend == '.') {
+                return true;
+            }
+            Integer.parseInt(String.valueOf(charToAppend));
+        } catch(NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    // Function for reset button
     public void reset() {
         data.clear();
         while (modelAssessment.getRowCount() > 0) {
             modelAssessment.removeRow(0);
         }
         System.out.println("The table has been reset");
-        accumulatedPercentage.setText("Accumulated Percentage: 0%");
-        maxAccumulatedPercentage.setText("Max Percentage Accumulated: 0%");
+        calculateAccumulatedPercentage();
     }
 
     // Function for the calculate button 
     public void calculate() {
-        if (data.size() == 0) {
-            JOptionPane.showMessageDialog(null, "Please add data", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        } else if (intCompTextField.getText().isEmpty()) {
+        if (intCompTextField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Please cap your marks", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        } else if (Double.parseDouble(intCompTextField.getText()) < 0) {
+            JOptionPane.showMessageDialog(null, "Cannot have an internal mark of less than 0", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        } else if (Double.parseDouble(intCompTextField.getText()) > 100) {
+            JOptionPane.showMessageDialog(null, "Cannot have an internal mark of more than 100", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         double[] listOfMark = calculateGrades();
         String outputText = uosTextField.getText() + " EXAM: \n";
 
-        if (listOfMark[0] < 0) {
+        if (listOfMark[0] <= 0) {
             outputText += "PASS: You have already passed the course \n";
         } else if (listOfMark[0] > 100) {
             outputText += "Sorry you have failed the course \n";
-            JOptionPane.showMessageDialog(null, outputText, "Oops", JOptionPane.PLAIN_MESSAGE); 
-            return;
         } else {
             outputText += "PASS : " + String.format("%.2f", listOfMark[0]) + "% \n";
         }
 
-        if (listOfMark[1] < 0) {
+        if (listOfMark[1] <= 0) {
             outputText += "CREDIT: You have already gained a credit\n";
         } else if (listOfMark[1] > 100) {
             outputText += "CREDIT: Sorry, you cannot get a credit or higher\n";
-            JOptionPane.showMessageDialog(null, outputText, "Percentage to get in the Exam", JOptionPane.PLAIN_MESSAGE); 
-            return;
         } else {
             outputText += "CREDIT : " + String.format("%.2f", listOfMark[1]) + "% \n";
         }
 
-        if (listOfMark[2] < 0) {
+        if (listOfMark[2] <= 0) {
             outputText += "DISTINCTION: You have already gained a Distinction\n";
         } else if (listOfMark[2] > 100) {
             outputText += "DISTINCTION: Sorry, you cannot get a Distinction or higher\n";
-            JOptionPane.showMessageDialog(null, outputText, "Percentage to get in the Exam", JOptionPane.PLAIN_MESSAGE); 
-            return;
         } else {
             outputText += "DISTINCTION : " + String.format("%.2f", listOfMark[2]) + "% \n";
         }
 
-        if (listOfMark[3] < 0) {
+        if (listOfMark[3] <= 0) {
             outputText += "HIGH DISTINCTION: You have already gained a High Distinction\n";
         } else if (listOfMark[3] > 100) {
             outputText += "HIGH DISTINCTION: Sorry, you cannot get a High Distinction\n";
-            JOptionPane.showMessageDialog(null, outputText, "Percentage to get in the Exam", JOptionPane.PLAIN_MESSAGE); 
-            return;
         } else {
             outputText += "HIGH DISTINCTION : " + String.format("%.2f", listOfMark[3]) + "% \n";
         }
 
-        JOptionPane.showMessageDialog(null, outputText, "Percentage to get in the Exam", JOptionPane.PLAIN_MESSAGE); 
+        Object[] options = {"Close", "Export to CSV"};
+
+        int option = JOptionPane.showOptionDialog(null, outputText, "Percentage in Exam", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+        if (option == 1) {
+            exportToCSV();
+            return;
+        }
+        
     }
 
     // Calculates % needed in exam to get a certain grade 
@@ -254,23 +347,15 @@ public class GradeCalculator extends JFrame {
             totalMark += ad.getPercentReceived();
         }
 
-        System.out.println("total Mark evaluates to: " + Double.toString(totalMark));
-
         returnList[0] = ((50.0 - totalMark) / examWorth) * 100;
         returnList[1] = ((65.0 - totalMark) / examWorth) * 100;
         returnList[2] = ((75.0 - totalMark) / examWorth) * 100;
         returnList[3] = ((85.0 - totalMark) / examWorth) * 100;
-
-        for (int i = 0; i < 4; i++) {
-            System.out.println(i + " evaluates to " + returnList[i]);
-        }
-
         return returnList;
     }
 
-    // Function for the Add Button 
-    public void addToList() {
-        Object[] row = new Object[5];
+    // Function for the Add Button (-1) and Update Button (corresponding index) 
+    public void addToList(int index) {
         try {
             if (intCompTextField.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please cap your internal marks", "Error", JOptionPane.ERROR_MESSAGE);
@@ -278,37 +363,70 @@ public class GradeCalculator extends JFrame {
             } else if (assTitleInputText.getText().isEmpty() || assInputText.getText().isEmpty() || maxMarkInput.getText().isEmpty() || percentWorthInput.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(null, "One or more areas in your assessment details are missing", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
-            }
+            } else if (Double.parseDouble(intCompTextField.getText()) < 0) {
+                JOptionPane.showMessageDialog(null, "Cannot have an internal mark of less than 0%", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            } else if (Double.parseDouble(intCompTextField.getText()) > 100) {
+                JOptionPane.showMessageDialog(null, "Cannot have an internal mark of more than 100%", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            } 
 
             String assessmentTitle = assTitleInputText.getText();
-            int markReceived = Integer.parseInt(assInputText.getText());
-            int maxMark = Integer.parseInt(maxMarkInput.getText());
-            int weighting = Integer.parseInt(percentWorthInput.getText());
-            int internalComposition = Integer.parseInt(intCompTextField.getText());
+            double markReceived = Double.parseDouble(assInputText.getText());
+            double maxMark = Double.parseDouble(maxMarkInput.getText());
+            double weighting = Double.parseDouble(percentWorthInput.getText());
+            double internalComposition = Double.parseDouble(intCompTextField.getText());
+
+            if (markReceived > maxMark) {
+                markReceived = maxMark;             
+            } else if (weighting > 100) {
+                JOptionPane.showMessageDialog(null, "Your assessment cannot be more than 100%", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            } else if (weighting < 0) {
+                JOptionPane.showMessageDialog(null, "Your assessment cannot be less than 0%", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             double totalPercentCalculated = 0; // The Total Percentage Max
-            double totalAccumulatedPercentage = 0; // The Total Percentage received
 
             AssignmentData newData = new AssignmentData(assessmentTitle, markReceived, maxMark, weighting);
-            data.add(newData);
+            
+            if (index == -1) {
+                data.add(newData);
+            } else {
+                data.set(index, newData);
+            }
 
             for (AssignmentData ad : data) {
                 totalPercentCalculated += ad.getWeighting();
                 if (totalPercentCalculated > internalComposition) {
-                    data.remove(data.size() - 1);
+                    if (index == -1) {
+                        data.remove(data.size() - 1);                    
+                    } else {
+                        data.remove(index);
+                    }
                     throw new IllegalArgumentException();
                 }
-                totalAccumulatedPercentage += ad.getPercentReceived();
             }
+            Object[] row = new Object[5];
             row[0] = assessmentTitle;
-            row[1] = markReceived;
-            row[2] = maxMark;
-            row[3] = newData.getPercentReceived();
-            row[4] = weighting;
+            row[1] = String.format("%.2f", markReceived);
+            row[2] = String.format("%.2f", maxMark);
+            row[3] = String.format("%.2f", newData.getPercentReceived());
+            row[4] = String.format("%.2f", weighting);
 
-            accumulatedPercentage.setText("Accumulated Percentage: " + totalAccumulatedPercentage + "%");
-            maxAccumulatedPercentage.setText("Max Accumulated Percentage: " + totalPercentCalculated + "%");
-            modelAssessment.addRow(row);
+            if (index == -1) {
+                modelAssessment.addRow(row);
+                calculateAccumulatedPercentage();
+            } else {
+                modelAssessment.setValueAt(row[0], index, 0);
+                modelAssessment.setValueAt(row[1], index, 1);
+                modelAssessment.setValueAt(row[2], index, 2);
+                modelAssessment.setValueAt(row[3], index, 3);
+                modelAssessment.setValueAt(row[4], index, 4);
+            }
+
+            System.out.println("Values have been added");
         } catch(NumberFormatException nfe) {
             JOptionPane.showMessageDialog(null, "Some or all fields have incorrect data type", "Error", JOptionPane.ERROR_MESSAGE);
         } catch(IllegalArgumentException iae) {
@@ -316,37 +434,91 @@ public class GradeCalculator extends JFrame {
         }
     }
 
-    // TODO: Not yet implemented, tested through the Calculate Button 
-    // Exports assessment data as well as the calculated grades data in exam to CSV
-    // BUGS: Calculated grades need to be rounded to 2DP 
-    // Additional Functionalities needed: Its own new button in the calculate grade button 
+    // Function for the Labels Accumulated % and Max Accumulated % Labels. Also returns their values as well
+    public double[] calculateAccumulatedPercentage() {
+        double[] returnValue = {0.0, 0.0};
+        
+        for (AssignmentData ad : data) {
+            returnValue[0] += ad.getPercentReceived();
+            returnValue[1] += ad.getWeighting();
+        }
+
+        accumulatedPercentage.setText("Accumulated Percentage: " + String.format("%.2f", returnValue[0]) + "%");
+        maxAccumulatedPercentage.setText("Max Accumulated Percentage: " + String.format("%.2f", returnValue[1]) + "%");
+        return returnValue;
+    }
+
+    // Function for the remove button 
+    public void remove() {
+        int i = tableOfAssessment.getSelectedRow();
+        if (i >= 0) {
+            modelAssessment.removeRow(i);
+            data.remove(i);
+            System.out.println("Index " + i + " has been removed");
+            calculateAccumulatedPercentage();
+        } else {
+            System.out.println("Remove error");
+        }
+    }
+
+    // Function for export to CSV  
     public void exportToCSV() {
-        if (data.size() == 0) {
-            // Print error; 
+        String content = "";
+        
+        if (data.size() != 0) {
+            content += "Assessment Title,Mark Received,Max Mark,% Received,Weighting\n";
+            for (AssignmentData ad : data) {
+                content += ad.getAssessmentTitle() + ",";
+                content += String.format("%.2f", ad.getMarkReceived()) + ",";
+                content += String.format("%.2f", ad.getMaxMark()) + ",";
+                content += String.format("%.2f", ad.getPercentReceived()) + ",";
+                content += String.format("%.2f", ad.getWeighting()) + "\n";
+            }
+            content += "\n";
+        }
+
+        content += "PERCENTAGE IN EXAM:\nPASS,CREDIT,DISTINCTION,HIGH DISTINCTION\n";
+        double[] examMarks = calculateGrades();
+        for (int i = 0; i < examMarks.length; i++) {
+            content += examMarks[i] + ",";
+        }
+        content += "\n\nINTERNAL ASSESSMENT WORTH:\n";
+        content += intCompTextField.getText() + "\n";
+
+        String directoryPath = "";
+        String filename = JOptionPane.showInputDialog(null, "Enter a filename");
+        if (filename == null) {
+            System.out.println("User cancelled Action Input Dialog");
+            return;
+        } else if (!filename.isEmpty()) {
+            filename += ".csv";
+        } else {
+            filename += uosTextField.getText() + "Results.csv";
+        }
+
+        JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
+        jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        jfc.setDialogTitle("Save");
+		int returnValue = jfc.showOpenDialog(null);
+		if (returnValue == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = jfc.getSelectedFile();
+			directoryPath = selectedFile.getAbsolutePath();
+		} else {
+            System.out.println("User cancelled action");
             return;
         }
-        try {
-            FileWriter filewriter = new FileWriter("DATA.csv");
-            filewriter.append("Assessment Title,Mark Received,Max Mark,% Received,Weighting");
-            filewriter.append("\n");
-            for (AssignmentData ad : data) {
-                filewriter.append(ad.getAssessmentTitle() + ",");
-                filewriter.append(ad.getMarkReceived() + ",");
-                filewriter.append(ad.getMaxMark() + ",");
-                filewriter.append(ad.getPercentReceived() + ",");
-                filewriter.append(ad.getWeighting() + "\n");
-            }
-            filewriter.append("\nPERCENTAGE IN EXAM:\nPASS,CREDIT,DISTINCTION,HIGH DISTINCTION\n");
 
-            double[] examMarks = calculateGrades();
-            for (int i = 0; i < examMarks.length; i++) {
-                filewriter.append(examMarks[i] + ",");
-            }
-            filewriter.append("\n");
-            filewriter.close();
+        try {
+            File f = new File(directoryPath + "\\" + filename);
+            FileWriter writer = new FileWriter(f);
+            writer.write(content);
+            writer.close();
+            JOptionPane.showMessageDialog(null, "Export Done!");
+            System.out.println("Exported to CSV");
         } catch (Exception e) {
-            // Print error
-        }
+            JOptionPane.showMessageDialog(null, "Failed to Write to File", "Error", JOptionPane.ERROR_MESSAGE);
+            System.out.println("Failed to export to CSV");            
+        } 
     }
 
     public static void main(String[] args) {

@@ -1,11 +1,11 @@
 public class AssignmentData {
     private String assessmentTitle;
     private double markReceived;
-    private int maxMark;
+    private double maxMark;
     private double percentReceived;
     private double weighting;
 
-    public AssignmentData(String assessmentTitle, double markReceived, int maxMark, double weighting) {
+    public AssignmentData(String assessmentTitle, double markReceived, double maxMark, double weighting) {
         this.assessmentTitle = assessmentTitle;
         this.markReceived = markReceived;
         this.maxMark = maxMark;
