@@ -1,7 +1,7 @@
 # Grade Calculator Program
 **What is it?**
 
-A Java Program that calculates what marks you need in the exam to get a certain grade i.e. Pass, Credit, Distinction, High Distinction 
+A Java Program that calculates what marks you need in the exam to get a certain grade. It works for both Australian and NZ Universities i.e. Pass, Credit, Distinction, High Distinction for Australian WAMs and A+,A,A-,B+,B,B-,C+,C,C-,D+,D,D- for NZ GPA Universities
 
 **Why did you make it?**
 
