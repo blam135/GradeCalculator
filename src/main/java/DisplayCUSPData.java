@@ -249,10 +249,11 @@ public class DisplayCUSPData extends JFrame {
             content += titleLabels.get(i).getText() + ",";
             double markReceived = Double.parseDouble(receivedTextFields.get(i).getText());
             double maxMark = Double.parseDouble(maxTextFields.get(i).getText());
+            double this_weighting = listOfAssessments.get(i).getWeighting();
             content += String.format("%.2f", markReceived) + ",";
             content += String.format("%.2f", maxMark) + ",";
-            content += String.format("%.2f", markReceived / maxMark * 100.00) + ",";
-            content += String.format("%.2f", listOfAssessments.get(i).getWeighting()) + ",";
+            content += String.format("%.2f", markReceived / maxMark * this_weighting) + ",";
+            content += String.format("%.2f", this_weighting) + ",";
             content += "\n";
         }
         content += "\n";
@@ -298,7 +299,8 @@ public class DisplayCUSPData extends JFrame {
             JOptionPane.showMessageDialog(null, "Export Done!");
             System.out.println("Exported to CSV");
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Failed to Write to File", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Failed to Write to File, make sure only one GradeCalculator program is opened or\n" +
+                    "if you're overwriting a file with the same name, make sure that file is closed", "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
             System.out.println("Failed to export to CSV");
         }
