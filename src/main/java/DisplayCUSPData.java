@@ -230,6 +230,7 @@ public class DisplayCUSPData extends JFrame {
             String thisExam = listOfAssessments.get(listOfAssessments.size() - 1).getAssessmentTitle().toLowerCase();
             if (thisExam.equals("exam")) {
                 examWeighting = listOfAssessments.get(listOfAssessments.size() - 1).getWeighting();
+                listOfAssessments.remove(listOfAssessments.size() - 1);
             } else {
                 JOptionPane.showMessageDialog(null, "There is no exam for this particular unit", "Error", JOptionPane.WARNING_MESSAGE);
                 return 1;
