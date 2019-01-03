@@ -3,6 +3,7 @@
 2. Set the bounds
 3. Add to panel
 */
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.*;
@@ -41,6 +42,7 @@ public class GradeCalculator extends JFrame {
     JComboBox<String> dropdown;
     JLabel gradingSystemLabel;
     String[] dropdownWords;
+    JButton importButton;
     
     // Constructor
     public GradeCalculator() {
@@ -241,10 +243,34 @@ public class GradeCalculator extends JFrame {
         dropdownWords = new String[] {"NZ-GPA", "AUS-WAM"};
         dropdown = new JComboBox<String>(dropdownWords);
         dropdown.setBounds(totalXPosition + 250, 35, 200, totalHeight + 5);
+        dropdown.setSelectedIndex(1);
+        dropdown.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (dropdown.getSelectedIndex() == 0) {
+                    importButton.setVisible(false);
+                } else {
+                    importButton.setVisible(true);
+                }
+            }
+        });
         gradingSystemLabel = new JLabel("Grading System:");
         gradingSystemLabel.setBounds(totalXPosition + 250, 10, 200, totalHeight + 5);
         panel.add(dropdown);
         panel.add(gradingSystemLabel);
+
+        // Import from CUSP Button
+        importButton = new JButton("Import from CUSP");
+        importButton.setBounds(tableXPosition, scrollPaneY + scrollPaneHeight + 30, buttonWidth + 89, buttonHeight);
+        importButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DisplayCUSPData dcd = new DisplayCUSPData();
+                dcd.setVisible(true);
+//                DisplayCUSPData.main(null);
+            }
+        });
+        panel.add(importButton);
 
         setContentPane(panel);
     }
@@ -348,10 +374,10 @@ public class GradeCalculator extends JFrame {
             This will return an array of corresponding grades where:
             index 0: Pass
             index 1: Credit
-            index 2: Distinction 
-            index 3: High Distinction 
-            (in terms of what % you need to get in the exam) 
-            - Assumes intCompTextField has been filled in already 
+            index 2: Distinction
+            index 3: High Distinction
+            (in terms of what % you need to get in the exam)
+            - Assumes intCompTextField has been filled in already
             - Can return values that are abnormal i.e. outside the range 0 - 100
             */
             double examWorth = 100.0 - Double.valueOf(intCompTextField.getText());
@@ -382,8 +408,8 @@ public class GradeCalculator extends JFrame {
             index 9: D+
             index 10: D
             index 11: D-
-            (in terms of what % you need to get in the exam) 
-            - Assumes intCompTextField has been filled in already 
+            (in terms of what % you need to get in the exam)
+            - Assumes intCompTextField has been filled in already
             - Can return values that are abnormal i.e. outside the range 0 - 100
             */
             double examWorth = 100.0 - Double.valueOf(intCompTextField.getText());
@@ -519,6 +545,7 @@ public class GradeCalculator extends JFrame {
 
     // Function for export to CSV  
     public void exportToCSV() {
+
         String content = "";
         
         if (data.size() != 0) {
@@ -584,12 +611,12 @@ public class GradeCalculator extends JFrame {
         } 
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new GradeCalculator().setVisible(true);
-            }
-        });
-    }
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(new Runnable() {
+//            public void run() {
+//                new GradeCalculator().setVisible(true);
+//            }
+//        });
+//    }
 
 }
