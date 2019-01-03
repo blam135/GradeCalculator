@@ -21,6 +21,7 @@ public class DisplayCUSPData extends JFrame {
     String unitOfStudy;
     Double examWeighting;
     JPanel panel;
+    double[] returnList;
 
     public DisplayCUSPData() {
 
@@ -135,8 +136,7 @@ public class DisplayCUSPData extends JFrame {
             accumTotal = max;
         }
 
-        System.out.println("Your results");
-        System.out.println(accumTotal + " " + max);
+        System.out.println("Your results: " + accumTotal + " " + max);
 
       /*
         This will return an array of corresponding grades where:
@@ -146,7 +146,7 @@ public class DisplayCUSPData extends JFrame {
         index 3: High Distinction
         (in terms of what % you need to get in the exam)
         */
-        double[] returnList = new double[4];
+        returnList = new double[4];
         double totalMark = (accumTotal / max) * (100 - examWeighting);
         returnList[0] = ((50.0 - totalMark) / examWeighting) * 100;
         returnList[1] = ((65.0 - totalMark) / examWeighting) * 100;
@@ -170,7 +170,7 @@ public class DisplayCUSPData extends JFrame {
         int option = JOptionPane.showOptionDialog(null, outputText, "Percentage in Exam", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
         if (option == 1) {
             // Export to CV
-            return;
+            exportToCSV();
         }
 
     }
@@ -241,12 +241,67 @@ public class DisplayCUSPData extends JFrame {
         return 0;
     }
 
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(new Runnable() {
-//            public void run() {
-//                new DisplayCUSPData().setVisible(true);
-//            }
-//        });
-//    }
+    public void exportToCSV() {
+
+        String content = "Assessment Title,Mark Received,Max Mark,% Received,Weighting\n";
+
+        for (int i = 0; i < titleLabels.size(); i++) {
+            content += titleLabels.get(i).getText() + ",";
+            double markReceived = Double.parseDouble(receivedTextFields.get(i).getText());
+            double maxMark = Double.parseDouble(maxTextFields.get(i).getText());
+            content += String.format("%.2f", markReceived) + ",";
+            content += String.format("%.2f", maxMark) + ",";
+            content += String.format("%.2f", markReceived / maxMark * 100.00) + ",";
+            content += String.format("%.2f", listOfAssessments.get(i).getWeighting()) + ",";
+            content += "\n";
+        }
+        content += "\n";
+
+        double[] examMarks;
+        content += "PERCENTAGE IN EXAM:\nPASS,CREDIT,DISTINCTION,HIGH DISTINCTION\n";
+
+        for (int i = 0; i < returnList.length; i++) {
+            content += String.format("%.2f", returnList[i]) + ",";
+        }
+
+        content += "\n\nINTERNAL ASSESSMENT WORTH:\n";
+        content += String.format("%.2f", (100.00 - examWeighting)) + "\n";
+
+        String directoryPath = "";
+        String filename = JOptionPane.showInputDialog(null, "Enter a filename");
+        if (filename == null) {
+            System.out.println("User cancelled Action Input Dialog");
+            return;
+        } else if (!filename.isEmpty()) {
+            filename += ".csv";
+        } else {
+            filename += unitOfStudy + "Results.csv";
+        }
+
+        JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
+        jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        jfc.setDialogTitle("Save");
+        int returnValue = jfc.showOpenDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = jfc.getSelectedFile();
+            directoryPath = selectedFile.getAbsolutePath();
+        } else {
+            System.out.println("User cancelled action");
+            return;
+        }
+
+        try {
+            File f = new File(directoryPath + "\\" + filename);
+            FileWriter writer = new FileWriter(f);
+            writer.write(content);
+            writer.close();
+            JOptionPane.showMessageDialog(null, "Export Done!");
+            System.out.println("Exported to CSV");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Failed to Write to File", "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            System.out.println("Failed to export to CSV");
+        }
+    }
 
 }
