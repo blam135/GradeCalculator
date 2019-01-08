@@ -6,11 +6,19 @@ public class AssignmentData {
     private double weighting;
 
     public AssignmentData(String assessmentTitle, double markReceived, double maxMark, double weighting) {
+        // Will assume if the max Mark received is 0, then the weighting is 0
         this.assessmentTitle = assessmentTitle;
-        this.markReceived = markReceived;
-        this.maxMark = maxMark;
-        this.weighting = weighting;
-        percentReceived = ((double) markReceived / (double) maxMark) * (double) weighting; // Fix this later
+        if (maxMark == 0) {
+            this.markReceived = 0;
+            this.maxMark = 0;
+            this.weighting = 0;
+            percentReceived = 0;
+        } else {
+            this.markReceived = markReceived;
+            this.maxMark = maxMark;
+            this.weighting = weighting;
+            percentReceived = (markReceived / maxMark) * weighting;
+        }
     }
 
     public String getAssessmentTitle() {
