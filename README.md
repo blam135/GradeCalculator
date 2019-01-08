@@ -24,7 +24,7 @@ MAC: So apparently Apple doesn't allow you to run jar files because I am not a v
 
 
 and you will see a program that looks like this:
-![image](https://github.com/blam135/GradeCalculator/blob/master/Capture.PNG)
+![image](./Capture.PNG)
 
 All fields except "UOS" must be filled, in order for the program to work
 
@@ -41,11 +41,13 @@ All fields except "UOS" must be filled, in order for the program to work
 #### Reset - Resets all assessment values on the table 
 #### ADD - Adds the assessment details to the table. Must have all required fields to be filled in. It will also not work if the total weighting becomes more than the internal composition   
 #### REMOVE - Removes the current selected row on the table (you have to click on the row)
-#### UPDATE - Removes the current selected row on the table (you have to click on the row) 
-
+#### UPDATE - Removes the current selected row on the table (you have to click on the row)
+#### IMPORT FROM CUSP - Only for USYD Students: Import data from the CUSP Website to automatically determine the assessments for that unit. Only thing you need to input are the raw marks you have received and the max raw marks you can receive for that particular unit 
 
 ### Text: 
 #### Accumulated Percentage - How many marks in % have you received so far 
 #### Max Percentage Accumulated - How many marks in % max you could've received
 
 © Brendon Lam 2018
+
+Credit to https://cusp.sydney.edu.au/ for their assessment resources provided for the "IMPORT FROM CUSP" Feature
